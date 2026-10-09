@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Severance Plan Calculator</title>
+<style>
+    :root {
+        --primary: #0056b3;
+        --secondary: #28a745;
+        --bg-color: #f4f7f6;
+        --text-main: #333;
+    }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        padding: 20px;
+        line-height: 1.6;
+    }
+    .container {
+        max-width: 650px;
+        margin: auto;
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    h2 {
+        text-align: center;
+        color: var(--text-main);
+        margin-top: 0;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+    .input-section {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 5px;
+        font-size: 0.9em;
+    }
+    input[type="number"], input[type="date"], select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+    .checkbox-group {
+        background: #fdfdfd;
+        border: 1px solid #eee;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    .checkbox-group p {
+        margin: 0 0 10px 0;
+        font-weight: bold;
+        font-size: 0.95em;
+    }
+    .checkbox-options {
+        display: flex;
+        gap: 20px;
+    }
+    .checkbox-options label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    details {
+        background: #f9f9f9;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    details[open] {
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    summary {
+        font-weight: bold;
+        cursor: pointer;
+        outline: none;
+        color: var(--primary);
+    }
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    button.calc-btn {
+        width: 100%;
+        padding: 12px;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: background 0.3s;
+    }
+    button.calc-btn:hover {
+        background: #004494;
+    }
+    #resultsArea {
+        margin-top: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .result-card {
+        padding: 20px;
+        border-radius: 6px;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        border-left: 5px solid #ccc;
+    }
+    .result-card.nutrien {
+        border-left-color: var(--primary);
+        background: #f0f7ff;
+    }
+    .result-card.proposed {
+        border-left-color: var(--secondary);
+        background: #f2fcf5;
+    }
+    .result-title {
+        font-weight: bold;
+        font-size: 1.2em;
+        margin-bottom: 10px;
+    }
+    .result-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 0.95em;
+    }
+    .result-total {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid rgba(0,0,0,0.1);
+        font-weight: bold;
+        font-size: 1.3em;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Severance Payout Calculator</h2>
+
+    <div class="input-section">
+        <div class="form-group">
+            <label for="basicPay">Monthly Base Salary ($)</label>
+            <input type="number" id="basicPay" value="23200">
+        </div>
+        <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" value="2008-04-07">
+        </div>
+        <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" value="2026-10-08">
+        </div>
+    </div>
+
+    <div class="checkbox-group">
+        <p>Select Severance Models to Calculate:</p>
+        <div class="checkbox-options">
+            <label><input type="checkbox" id="showNutrien" checked> Nutrien Package</label>
+            <label><input type="checkbox" id="showProposed" checked> Proposed 2026 Bill</label>
+        </div>
+    </div>
+
+    <!-- Collapsible settings for Nutrien Package -->
+    <details>
+        <summary>⚙️ Customize Nutrien Package Terms</summary>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label>Tier 1 Threshold (Years)</label>
+                <input type="number" id="nutrienThreshold" value="4">
+            </div>
+            <div></div> <!-- Empty spacer -->
+            <div class="form-group">
+                <label>Tier 1 Rate Value</label>
+                <input type="number" id="nutrienT1Value" value="3">
+            </div>
+            <div class="form-group">
+                <label>Tier 1 Unit</label>
+                <select id="nutrienT1Unit">
+                    <option value="weeks" selected>Weeks / Year</option>
+                    <option value="months">Months / Year</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tier 2 Rate Value</label>
+                <input type="number" id="nutrienT2Value" value="1">
+            </div>
+            <div class="form-group">
+                <label>Tier 2 Unit</label>
+                <select id="nutrienT2Unit">
+                    <option value="weeks">Weeks / Year</option>
+                    <option value="months" selected>Months / Year</option>
+                </select>
+            </div>
+        </div>
+    </details>
+
+    <!-- Collapsible settings for Proposed Amendment -->
+    <details>
+        <summary>⚙️ Customize Proposed 2026 Terms</summary>
+        <div class="settings-grid">
+            <div class="form-group">
+                <label>Tier 1 Threshold (Years)</label>
+                <input type="number" id="proposedThreshold" value="4">
+            </div>
+            <div></div> <!-- Empty spacer -->
+            <div class="form-group">
+                <label>Tier 1 Rate Value</label>
+                <input type="number" id="proposedT1Value" value="1.25" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Tier 1 Unit</label>
+                <select id="proposedT1Unit">
+                    <option value="weeks">Weeks / Year</option>
+                    <option value="months" selected>Months / Year</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tier 2 Rate Value</label>
+                <input type="number" id="proposedT2Value" value="1.75" step="0.01">
+            </div>
+            <div class="form-group">
+                <label>Tier 2 Unit</label>
+                <select id="proposedT2Unit">
+                    <option value="weeks">Weeks / Year</option>
+                    <option value="months" selected>Months / Year</option>
+                </select>
+            </div>
+        </div>
+    </details>
+
+    <button class="calc-btn" onclick="calculateSeverance()">Calculate Payout</button>
+
+    <div id="resultsArea"></div>
+</div>
+
+<script>
+    // Format currency
+    const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    });
+
+    function calculateSeverance() {
+        const basicPay = parseFloat(document.getElementById('basicPay').value) || 0;
+        const startDate = new Date(document.getElementById('startDate').value);
+        const endDate = new Date(document.getElementById('endDate').value);
+        const resultsArea = document.getElementById('resultsArea');
+        
+        resultsArea.innerHTML = '';
+
+        if (isNaN(startDate) || isNaN(endDate) || startDate >= endDate) {
+            alert("Please ensure the End Date is after the Start Date.");
+            return;
+        }
+
+        // Calculate exact decimal years (prorated calculation)
+        const msPerYear = 1000 * 60 * 60 * 24 * 365.25;
+        const yearsOfService = (endDate - startDate) / msPerYear;
+        
+        // Annualize basic pay to derive accurate weekly rate
+        const weeklyPay = (basicPay * 12) / 52;
+
+        function calcTierPayout(years, threshold, t1Val, t1Unit, t2Val, t2Unit) {
+            const tier1Years = Math.min(years, threshold);
+            const tier2Years = Math.max(0, years - threshold);
+
+            const t1Multiplier = (t1Unit === 'weeks') ? (weeklyPay * t1Val) : (basicPay * t1Val);
+            const t2Multiplier = (t2Unit === 'weeks') ? (weeklyPay * t2Val) : (basicPay * t2Val);
+
+            const t1Payout = tier1Years * t1Multiplier;
+            const t2Payout = tier2Years * t2Multiplier;
+
+            return {
+                tier1Total: t1Payout,
+                tier2Total: t2Payout,
+                grandTotal: t1Payout + t2Payout
+            };
+        }
+
+        // 1. Nutrien Calculation
+        if (document.getElementById('showNutrien').checked) {
+            const threshold = parseFloat(document.getElementById('nutrienThreshold').value);
+            const t1Val = parseFloat(document.getElementById('nutrienT1Value').value);
+            const t1Unit = document.getElementById('nutrienT1Unit').value;
+            const t2Val = parseFloat(document.getElementById('nutrienT2Value').value);
+            const t2Unit = document.getElementById('nutrienT2Unit').value;
+
+            const res = calcTierPayout(yearsOfService, threshold, t1Val, t1Unit, t2Val, t2Unit);
+            
+            resultsArea.innerHTML += `
+                <div class="result-card nutrien">
+                    <div class="result-title">Nutrien Offered Package</div>
+                    <div class="result-line"><span>Total Tenure:</span> <span>${yearsOfService.toFixed(2)} Years</span></div>
+                    <div class="result-line"><span>Tier 1 Payout (First ${threshold} Years):</span> <span>${formatter.format(res.tier1Total)}</span></div>
+                    <div class="result-line"><span>Tier 2 Payout (Additional Years):</span> <span>${formatter.format(res.tier2Total)}</span></div>
+                    <div class="result-total"><span>Total Estimated Payout:</span> <span>${formatter.format(res.grandTotal)}</span></div>
+                </div>
+            `;
+        }
+
+        // 2. Proposed Amendment Calculation
+        if (document.getElementById('showProposed').checked) {
+            const threshold = parseFloat(document.getElementById('proposedThreshold').value);
+            const t1Val = parseFloat(document.getElementById('proposedT1Value').value);
+            const t1Unit = document.getElementById('proposedT1Unit').value;
+            const t2Val = parseFloat(document.getElementById('proposedT2Value').value);
+            const t2Unit = document.getElementById('proposedT2Unit').value;
+
+            const res = calcTierPayout(yearsOfService, threshold, t1Val, t1Unit, t2Val, t2Unit);
+            
+            resultsArea.innerHTML += `
+                <div class="result-card proposed">
+                    <div class="result-title">Proposed 2026 Amendment Bill</div>
+                    <div class="result-line"><span>Total Tenure:</span> <span>${yearsOfService.toFixed(2)} Years</span></div>
+                    <div class="result-line"><span>Tier 1 Payout (First ${threshold} Years):</span> <span>${formatter.format(res.tier1Total)}</span></div>
+                    <div class="result-line"><span>Tier 2 Payout (Additional Years):</span> <span>${formatter.format(res.tier2Total)}</span></div>
+                    <div class="result-total"><span>Total Estimated Payout:</span> <span>${formatter.format(res.grandTotal)}</span></div>
+                </div>
+            `;
+        }
+    }
+
+    // Run calculation on load with default values
+    window.onload = calculateSeverance;
+</script>
+</body>
+</html>
